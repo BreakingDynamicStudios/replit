@@ -125,6 +125,16 @@ const server = app.listen(PORT, '0.0.0.0', () => {
     logger.info(`Keep-alive server is running on port ${PORT}`);
 }).on('error', (err) => {
     if (err.code === 'EADDRINUSE') {
+        // Try next available port
+        const nextPort = PORT + 1;
+        logger.info(`Port ${PORT} is busy, trying port ${nextPort}`);
+        app.listen(nextPort, '0.0.0.0', () => {
+            logger.info(`Keep-alive server is running on port ${nextPort}`);
+        });
+    } else {
+        logger.error('Server error:', err);
+    }
+    if (err.code === 'EADDRINUSE') {
         logger.error(`Port ${PORT} is already in use. Please stop other running instances.`);
         process.exit(1);
     } else {
