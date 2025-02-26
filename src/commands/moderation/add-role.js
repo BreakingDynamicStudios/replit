@@ -1,6 +1,13 @@
 const { SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
 const { checkModPermissions } = require('../../utils/permissions');
 const { logger } = require('../../utils/logger');
+
+function handleRoleError(error) {
+    if (error.code === 50013) {
+        return "I don't have permission to manage this role. Please make sure my role is higher in the server's role hierarchy.";
+    }
+    return "An error occurred while managing the role. Please check my permissions.";
+}
 const { logModAction } = require('../../utils/modLogger');
 
 module.exports = {
