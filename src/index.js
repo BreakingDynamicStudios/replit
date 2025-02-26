@@ -4,6 +4,7 @@ const path = require('path');
 const { logger } = require('./utils/logger');
 const config = require('../config');
 const express = require('express');
+const os = require('os');
 
 const client = new Client({
     intents: [
@@ -55,7 +56,7 @@ client.login(process.env.TOKEN || config.token);
 // Keep alive server
 const app = express();
 
-// Health check endpoint
+// Basic health check
 app.get('/', (req, res) => {
     res.send({
         status: 'ok',
@@ -65,14 +66,63 @@ app.get('/', (req, res) => {
     });
 });
 
-// Status endpoint
+// Detailed status endpoint
 app.get('/status', (req, res) => {
+    const memoryUsage = process.memoryUsage();
+    const systemMemory = {
+        total: os.totalmem(),
+        free: os.freemem(),
+        used: os.totalmem() - os.freemem()
+    };
+
     res.send({
         status: 'online',
-        guildCount: client.guilds.cache.size,
-        ping: client.ws.ping
+        uptime: {
+            seconds: process.uptime(),
+            formatted: formatUptime(process.uptime())
+        },
+        bot: {
+            status: client.isReady() ? 'online' : 'connecting',
+            guildCount: client.guilds.cache.size,
+            ping: client.ws.ping,
+            commandCount: client.commands.size
+        },
+        system: {
+            memory: {
+                process: {
+                    heapUsed: formatBytes(memoryUsage.heapUsed),
+                    heapTotal: formatBytes(memoryUsage.heapTotal),
+                    rss: formatBytes(memoryUsage.rss)
+                },
+                system: {
+                    total: formatBytes(systemMemory.total),
+                    free: formatBytes(systemMemory.free),
+                    used: formatBytes(systemMemory.used)
+                }
+            },
+            platform: process.platform,
+            nodeVersion: process.version,
+            cpuUsage: process.cpuUsage()
+        },
+        lastChecked: new Date().toISOString()
     });
 });
+
+// Helper functions
+function formatBytes(bytes) {
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    if (bytes === 0) return '0 Byte';
+    const i = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)));
+    return Math.round((bytes / Math.pow(1024, i))) + ' ' + sizes[i];
+}
+
+function formatUptime(uptime) {
+    const days = Math.floor(uptime / 86400);
+    const hours = Math.floor((uptime % 86400) / 3600);
+    const minutes = Math.floor((uptime % 3600) / 60);
+    const seconds = Math.floor(uptime % 60);
+    return `${days}d ${hours}h ${minutes}m ${seconds}s`;
+}
 
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, '0.0.0.0', () => {
