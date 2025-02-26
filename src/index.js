@@ -119,10 +119,17 @@ app.get('/url-info', (req, res) => {
     });
 });
 
-// Use consistent port for Replit
-const PORT = 8080;
-app.listen(PORT, '0.0.0.0', () => {
+// Use consistent port for Replit with fallback
+const PORT = process.env.PORT || 8080;
+const server = app.listen(PORT, '0.0.0.0', () => {
     logger.info(`Keep-alive server is running on port ${PORT}`);
+}).on('error', (err) => {
+    if (err.code === 'EADDRINUSE') {
+        logger.error(`Port ${PORT} is already in use. Please stop other running instances.`);
+        process.exit(1);
+    } else {
+        logger.error('Server error:', err);
+    }
 });
 
 function formatBytes(bytes) {
