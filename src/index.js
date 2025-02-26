@@ -53,17 +53,13 @@ process.on('unhandledRejection', error => {
 // Login to Discord
 client.login(process.env.TOKEN || config.token);
 
-// Keep alive server
+// Keep alive server configuration
 const app = express();
 
-// Basic keep-alive endpoint for UptimeRobot
+// Simple keep-alive endpoint for UptimeRobot
 app.get('/', (req, res) => {
-    res.send({
-        status: 'ok',
-        timestamp: new Date().toISOString(),
-        uptime: process.uptime(),
-        message: "Bot is alive!"
-    });
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.send("I am alive!");
 });
 
 // Status endpoint with detailed info
@@ -75,6 +71,7 @@ app.get('/status', (req, res) => {
         used: os.totalmem() - os.freemem()
     };
 
+    res.setHeader('Access-Control-Allow-Origin', '*');
     res.send({
         status: client.isReady() ? 'online' : 'connecting',
         uptime: {
@@ -110,13 +107,24 @@ app.get('/status', (req, res) => {
 
 // Add new route to show Replit URL info
 app.get('/url-info', (req, res) => {
+    res.setHeader('Access-Control-Allow-Origin', '*');
     res.send({
         message: "Your Replit URL for UptimeRobot is:",
-        url: `https://${process.env.REPL_SLUG}.${process.env.REPL_OWNER}.repl.co`
+        url: process.env.REPLIT_DOMAINS,
+        note: "Use this URL when setting up UptimeRobot to keep your bot alive.",
+        environment: {
+            replit_domains: process.env.REPLIT_DOMAINS,
+            repl_id: process.env.REPL_ID
+        }
     });
 });
 
-// Helper functions
+// Use consistent port for Replit
+const PORT = 8080;
+app.listen(PORT, '0.0.0.0', () => {
+    logger.info(`Keep-alive server is running on port ${PORT}`);
+});
+
 function formatBytes(bytes) {
     const sizes = ['Bytes', 'KB', 'MB', 'GB'];
     if (bytes === 0) return '0 Byte';
@@ -131,9 +139,3 @@ function formatUptime(uptime) {
     const seconds = Math.floor(uptime % 60);
     return `${days}d ${hours}h ${minutes}m ${seconds}s`;
 }
-
-// Use consistent port for Replit
-const PORT = 8080; 
-app.listen(PORT, '0.0.0.0', () => {
-    logger.info(`Keep-alive server is running on port ${PORT}`);
-});
