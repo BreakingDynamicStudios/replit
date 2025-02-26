@@ -1,6 +1,7 @@
 const { SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
 const { checkModPermissions } = require('../../utils/permissions');
 const { logger } = require('../../utils/logger');
+const { logModAction } = require('../../utils/modLogger');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -43,7 +44,7 @@ module.exports = {
             }
 
             await target.ban({ deleteMessageDays: days, reason: reason });
-            logger.info(`${target.user.tag} was banned by ${interaction.user.tag} for: ${reason}`);
+            await logModAction(interaction, 'ban', target, reason);
 
             await interaction.reply({
                 content: `Successfully banned ${target.user.tag}\nReason: ${reason}`,

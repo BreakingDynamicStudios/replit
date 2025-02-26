@@ -3,6 +3,7 @@ const fs = require('fs');
 const path = require('path');
 const { logger } = require('./utils/logger');
 const config = require('../config');
+const express = require('express');
 
 const client = new Client({
     intents: [
@@ -21,7 +22,7 @@ const commandFolders = fs.readdirSync(commandsPath);
 for (const folder of commandFolders) {
     const folderPath = path.join(commandsPath, folder);
     const commandFiles = fs.readdirSync(folderPath).filter(file => file.endsWith('.js'));
-    
+
     for (const file of commandFiles) {
         const filePath = path.join(folderPath, file);
         const command = require(filePath);
@@ -48,10 +49,32 @@ process.on('unhandledRejection', error => {
     logger.error('Unhandled promise rejection:', error);
 });
 
+// Login to Discord
 client.login(process.env.TOKEN || config.token);
 
-// Keep alive for Replit
-const express = require('express');
+// Keep alive server
 const app = express();
-app.get('/', (req, res) => res.send('Bot is running!'));
-app.listen(8000);
+
+// Health check endpoint
+app.get('/', (req, res) => {
+    res.send({
+        status: 'ok',
+        timestamp: new Date().toISOString(),
+        uptime: process.uptime(),
+        botStatus: client.isReady() ? 'online' : 'connecting'
+    });
+});
+
+// Status endpoint
+app.get('/status', (req, res) => {
+    res.send({
+        status: 'online',
+        guildCount: client.guilds.cache.size,
+        ping: client.ws.ping
+    });
+});
+
+const PORT = process.env.PORT || 8080;
+app.listen(PORT, '0.0.0.0', () => {
+    logger.info(`Keep-alive server is running on port ${PORT}`);
+});

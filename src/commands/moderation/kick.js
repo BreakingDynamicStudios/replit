@@ -1,6 +1,7 @@
 const { SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
 const { checkModPermissions } = require('../../utils/permissions');
 const { logger } = require('../../utils/logger');
+const { logModAction } = require('../../utils/modLogger');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -37,7 +38,7 @@ module.exports = {
             }
 
             await target.kick(reason);
-            logger.info(`${target.user.tag} was kicked by ${interaction.user.tag} for: ${reason}`);
+            await logModAction(interaction, 'kick', target, reason);
 
             await interaction.reply({
                 content: `Successfully kicked ${target.user.tag}\nReason: ${reason}`,

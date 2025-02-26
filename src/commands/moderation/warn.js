@@ -5,19 +5,16 @@ const { logModAction } = require('../../utils/modLogger');
 
 module.exports = {
     data: new SlashCommandBuilder()
-        .setName('timeout')
-        .setDescription('Timeout a member')
+        .setName('warn')
+        .setDescription('Warn a member')
         .addUserOption(option =>
             option.setName('target')
-                .setDescription('The member to timeout')
-                .setRequired(true))
-        .addNumberOption(option =>
-            option.setName('duration')
-                .setDescription('Timeout duration in minutes')
+                .setDescription('The member to warn')
                 .setRequired(true))
         .addStringOption(option =>
             option.setName('reason')
-                .setDescription('Reason for timeout'))
+                .setDescription('Reason for warning')
+                .setRequired(true))
         .setDefaultMemberPermissions(PermissionFlagsBits.ModerateMembers),
 
     async execute(interaction) {
@@ -25,8 +22,7 @@ module.exports = {
             if (!await checkModPermissions(interaction, 'ModerateMembers')) return;
 
             const target = interaction.options.getMember('target');
-            const duration = interaction.options.getNumber('duration');
-            const reason = interaction.options.getString('reason') || 'No reason provided';
+            const reason = interaction.options.getString('reason');
 
             if (!target) {
                 return await interaction.reply({
@@ -35,22 +31,21 @@ module.exports = {
                 });
             }
 
-            if (!target.moderatable) {
-                return await interaction.reply({
-                    content: 'I cannot timeout this user!',
-                    ephemeral: true
-                });
+            // Send warning to the user
+            try {
+                await target.send(`You have been warned in ${interaction.guild.name}\nReason: ${reason}`);
+            } catch (error) {
+                logger.warn(`Could not DM warning to ${target.user.tag}`);
             }
 
-            await target.timeout(duration * 60 * 1000, reason);
-            await logModAction(interaction, 'timeout', target, reason, duration);
+            await logModAction(interaction, 'warn', target, reason);
 
             await interaction.reply({
-                content: `Successfully timed out ${target.user.tag} for ${duration} minutes\nReason: ${reason}`,
+                content: `Successfully warned ${target.user.tag}\nReason: ${reason}`,
                 ephemeral: true
             });
         } catch (error) {
-            logger.error('Error in timeout command:', error);
+            logger.error('Error in warn command:', error);
             await interaction.reply({
                 content: 'There was an error executing this command!',
                 ephemeral: true
