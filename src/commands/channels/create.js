@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, PermissionFlagsBits, ChannelType } = require('discord.js');
+const { SlashCommandBuilder, PermissionFlagsBits, ChannelType, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const { checkModPermissions } = require('../../utils/permissions');
 const { logger } = require('../../utils/logger');
 
@@ -45,8 +45,26 @@ module.exports = {
                 parent: casesCategory.id
             });
 
-            // Send initial case information
-            await channel.send(`**Case: ${title}**\n**Reason:** ${reason}\n**Opened by:** ${interaction.user}`);
+            // Create buttons for case management
+            const row = new ActionRowBuilder()
+                .addComponents(
+                    new ButtonBuilder()
+                        .setCustomId('case_claim')
+                        .setLabel('Claim Case')
+                        .setStyle(ButtonStyle.Primary)
+                        .setEmoji('👋'),
+                    new ButtonBuilder()
+                        .setCustomId('case_close')
+                        .setLabel('Close Case')
+                        .setStyle(ButtonStyle.Danger)
+                        .setEmoji('🔒')
+                );
+
+            // Send initial case information with buttons
+            await channel.send({
+                content: `**Case: ${title}**\n**Reason:** ${reason}\n**Opened by:** ${interaction.user}`,
+                components: [row]
+            });
 
             logger.info(`${interaction.user.tag} opened case channel ${channel.name}`);
 

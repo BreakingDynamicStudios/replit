@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, PermissionFlagsBits, ChannelType } = require('discord.js');
+const { SlashCommandBuilder, PermissionFlagsBits, ChannelType, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const { checkModPermissions } = require('../../utils/permissions');
 const { logger } = require('../../utils/logger');
 
@@ -45,8 +45,26 @@ module.exports = {
                 parent: investigationsCategory.id
             });
 
-            // Send initial investigation information
-            await channel.send(`**Investigation: ${title}**\n**Reason:** ${reason}\n**Started by:** ${interaction.user}`);
+            // Create buttons for investigation management
+            const row = new ActionRowBuilder()
+                .addComponents(
+                    new ButtonBuilder()
+                        .setCustomId('investigation_claim')
+                        .setLabel('Claim Investigation')
+                        .setStyle(ButtonStyle.Primary)
+                        .setEmoji('👋'),
+                    new ButtonBuilder()
+                        .setCustomId('investigation_close')
+                        .setLabel('Close Investigation')
+                        .setStyle(ButtonStyle.Danger)
+                        .setEmoji('🔒')
+                );
+
+            // Send initial investigation information with buttons
+            await channel.send({
+                content: `**Investigation: ${title}**\n**Reason:** ${reason}\n**Started by:** ${interaction.user}`,
+                components: [row]
+            });
 
             logger.info(`${interaction.user.tag} started investigation channel ${channel.name}`);
 
