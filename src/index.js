@@ -6,23 +6,17 @@ const config = require('../config');
 const express = require('express');
 const os = require('os');
 
-// Import and start Flask server
-const { PythonShell } = require('python-shell');
-const pythonOptions = {
-    pythonPath: 'python',
-    scriptPath: 'src',
-    mode: 'text'
-};
+// Start Flask server
+const { spawn } = require('child_process');
+const python = spawn('python3', ['src/flask_server.py']);
 
-try {
-    PythonShell.run('flask_server.py', pythonOptions).then(messages => {
-        logger.info('Flask server started successfully');
-    }).catch(err => {
-        logger.error('Flask server error:', err);
-    });
-} catch (err) {
-    logger.error('Failed to start Flask server:', err);
-}
+python.stdout.on('data', (data) => {
+    logger.info(`Flask: ${data}`);
+});
+
+python.stderr.on('data', (data) => {
+    logger.error(`Flask Error: ${data}`);
+});
 
 const client = new Client({
     intents: [
