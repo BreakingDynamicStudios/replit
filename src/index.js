@@ -3,8 +3,6 @@ const fs = require('fs');
 const path = require('path');
 const { logger } = require('./utils/logger');
 const config = require('../config');
-const express = require('express');
-const os = require('os');
 
 const client = new Client({
     intents: [
@@ -52,97 +50,6 @@ process.on('unhandledRejection', error => {
 
 // Login to Discord
 client.login(process.env.TOKEN || config.token);
-
-// Keep alive server configuration
-const app = express();
-
-// Simple keep-alive endpoint for UptimeRobot
-app.get('/', (req, res) => {
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.send("I am alive!");
-});
-
-// Status endpoint with detailed info
-app.get('/status', (req, res) => {
-    const memoryUsage = process.memoryUsage();
-    const systemMemory = {
-        total: os.totalmem(),
-        free: os.freemem(),
-        used: os.totalmem() - os.freemem()
-    };
-
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.send({
-        status: client.isReady() ? 'online' : 'connecting',
-        uptime: {
-            seconds: process.uptime(),
-            formatted: formatUptime(process.uptime())
-        },
-        bot: {
-            status: client.isReady() ? 'online' : 'connecting',
-            guildCount: client.guilds.cache.size,
-            ping: client.ws.ping,
-            commandCount: client.commands.size
-        },
-        system: {
-            memory: {
-                process: {
-                    heapUsed: formatBytes(memoryUsage.heapUsed),
-                    heapTotal: formatBytes(memoryUsage.heapTotal),
-                    rss: formatBytes(memoryUsage.rss)
-                },
-                system: {
-                    total: formatBytes(systemMemory.total),
-                    free: formatBytes(systemMemory.free),
-                    used: formatBytes(systemMemory.used)
-                }
-            },
-            platform: process.platform,
-            nodeVersion: process.version,
-            cpuUsage: process.cpuUsage()
-        },
-        lastChecked: new Date().toISOString()
-    });
-});
-
-// Add new route to show Replit URL info
-app.get('/url-info', (req, res) => {
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.send({
-        message: "Your Replit URL for UptimeRobot is:",
-        url: process.env.REPLIT_DOMAINS,
-        note: "Use this URL when setting up UptimeRobot to keep your bot alive.",
-        environment: {
-            replit_domains: process.env.REPLIT_DOMAINS,
-            repl_id: process.env.REPL_ID
-        }
-    });
-});
-
-// Use consistent port for Replit with fallback
-const PORT = process.env.PORT || 8081;
-
-function startServer(port) {
-    return new Promise((resolve, reject) => {
-        const server = app.listen(port, '0.0.0.0', () => {
-            logger.info(`Keep-alive server is running on port ${port}`);
-            resolve(server);
-        }).on('error', (err) => {
-            if (err.code === 'EADDRINUSE') {
-                logger.info(`Port ${port} is busy, trying next port`);
-                resolve(startServer(port + 1));
-            } else {
-                logger.error('Server error:', err);
-                reject(err);
-            }
-        });
-    });
-}
-
-startServer(PORT).catch(err => {
-    logger.error('Failed to start server:', err);
-    process.exit(1);
-});
 
 function formatBytes(bytes) {
     const sizes = ['Bytes', 'KB', 'MB', 'GB'];
