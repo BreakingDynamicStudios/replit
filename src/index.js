@@ -9,7 +9,7 @@ const os = require('os');
 // Import and start Flask server
 const { PythonShell } = require('python-shell');
 const pythonOptions = {
-    pythonPath: 'python',
+    pythonPath: 'python3',
     scriptPath: 'src'
 };
 PythonShell.run('flask_server.py', pythonOptions, function (err) {
