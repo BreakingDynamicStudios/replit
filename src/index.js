@@ -6,18 +6,6 @@ const config = require('../config');
 const express = require('express');
 const os = require('os');
 
-// Start Flask server
-const { spawn } = require('child_process');
-const python = spawn('python3', ['src/flask_server.py']);
-
-python.stdout.on('data', (data) => {
-    logger.info(`Flask: ${data}`);
-});
-
-python.stderr.on('data', (data) => {
-    logger.error(`Flask Error: ${data}`);
-});
-
 const client = new Client({
     intents: [
         GatewayIntentBits.Guilds,
