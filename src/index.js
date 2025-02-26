@@ -56,17 +56,17 @@ client.login(process.env.TOKEN || config.token);
 // Keep alive server
 const app = express();
 
-// Basic health check
+// Basic keep-alive endpoint for UptimeRobot
 app.get('/', (req, res) => {
     res.send({
         status: 'ok',
         timestamp: new Date().toISOString(),
         uptime: process.uptime(),
-        botStatus: client.isReady() ? 'online' : 'connecting'
+        message: "Bot is alive!"
     });
 });
 
-// Detailed status endpoint
+// Status endpoint with detailed info
 app.get('/status', (req, res) => {
     const memoryUsage = process.memoryUsage();
     const systemMemory = {
@@ -76,7 +76,7 @@ app.get('/status', (req, res) => {
     };
 
     res.send({
-        status: 'online',
+        status: client.isReady() ? 'online' : 'connecting',
         uptime: {
             seconds: process.uptime(),
             formatted: formatUptime(process.uptime())
@@ -124,7 +124,8 @@ function formatUptime(uptime) {
     return `${days}d ${hours}h ${minutes}m ${seconds}s`;
 }
 
-const PORT = process.env.PORT || 8080;
+// Use consistent port for Replit
+const PORT = 8080; 
 app.listen(PORT, '0.0.0.0', () => {
     logger.info(`Keep-alive server is running on port ${PORT}`);
 });

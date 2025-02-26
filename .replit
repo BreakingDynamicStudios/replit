@@ -52,6 +52,10 @@ args = "node src/deploy-commands.js"
 run = ["sh", "-c", "node src/index.js"]
 
 [[ports]]
+localPort = 5000
+externalPort = 5000
+
+[[ports]]
 localPort = 8000
 externalPort = 80
 
