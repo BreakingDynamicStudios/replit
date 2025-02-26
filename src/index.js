@@ -121,25 +121,27 @@ app.get('/url-info', (req, res) => {
 
 // Use consistent port for Replit with fallback
 const PORT = process.env.PORT || 8081;
-const server = app.listen(PORT, '0.0.0.0', () => {
-    logger.info(`Keep-alive server is running on port ${PORT}`);
-}).on('error', (err) => {
-    if (err.code === 'EADDRINUSE') {
-        // Try next available port
-        const nextPort = PORT + 1;
-        logger.info(`Port ${PORT} is busy, trying port ${nextPort}`);
-        app.listen(nextPort, '0.0.0.0', () => {
-            logger.info(`Keep-alive server is running on port ${nextPort}`);
+
+function startServer(port) {
+    return new Promise((resolve, reject) => {
+        const server = app.listen(port, '0.0.0.0', () => {
+            logger.info(`Keep-alive server is running on port ${port}`);
+            resolve(server);
+        }).on('error', (err) => {
+            if (err.code === 'EADDRINUSE') {
+                logger.info(`Port ${port} is busy, trying next port`);
+                resolve(startServer(port + 1));
+            } else {
+                logger.error('Server error:', err);
+                reject(err);
+            }
         });
-    } else {
-        logger.error('Server error:', err);
-    }
-    if (err.code === 'EADDRINUSE') {
-        logger.error(`Port ${PORT} is already in use. Please stop other running instances.`);
-        process.exit(1);
-    } else {
-        logger.error('Server error:', err);
-    }
+    });
+}
+
+startServer(PORT).catch(err => {
+    logger.error('Failed to start server:', err);
+    process.exit(1);
 });
 
 function formatBytes(bytes) {
