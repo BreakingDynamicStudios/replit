@@ -108,6 +108,14 @@ app.get('/status', (req, res) => {
     });
 });
 
+// Add new route to show Replit URL info
+app.get('/url-info', (req, res) => {
+    res.send({
+        message: "Your Replit URL for UptimeRobot is:",
+        url: `https://${process.env.REPL_SLUG}.${process.env.REPL_OWNER}.repl.co`
+    });
+});
+
 // Helper functions
 function formatBytes(bytes) {
     const sizes = ['Bytes', 'KB', 'MB', 'GB'];
