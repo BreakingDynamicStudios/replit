@@ -11,6 +11,7 @@
   "description": "",
   "dependencies": {
     "discord.js": "^14.18.0",
-    "express": "^4.21.2"
+    "express": "^4.21.2",
+    "python-shell": "^5.0.0"
   }
 }

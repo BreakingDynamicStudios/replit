@@ -6,6 +6,12 @@ const config = require('../config');
 const express = require('express');
 const os = require('os');
 
+// Import and start Flask server
+const { PythonShell } = require('python-shell');
+PythonShell.run('src/flask_server.py', null, function (err) {
+    if (err) logger.error('Flask server error:', err);
+});
+
 const client = new Client({
     intents: [
         GatewayIntentBits.Guilds,
