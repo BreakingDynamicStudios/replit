@@ -10,8 +10,8 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.get('/ping', (req, res) => {
     res.json({ status: 'ok', timestamp: new Date() });
 });
-const server = app.listen(3000, '0.0.0.0', () => {
-    logger.info('Status page running on port 3000');
+const server = app.listen(5000, '0.0.0.0', () => {
+    logger.info('Status page running on port 5000');
 }).on('error', (err) => {
     logger.error('Failed to start web server:', err);
 });
