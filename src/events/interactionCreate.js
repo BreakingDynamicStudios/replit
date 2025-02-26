@@ -6,11 +6,35 @@ module.exports = {
     async execute(interaction) {
         try {
             if (interaction.isButton()) {
-                if (interaction.customId === 'create_ticket') {
+                // Handle ticket creation buttons
+                if (interaction.customId.startsWith('ticket_')) {
                     await interaction.deferReply({ ephemeral: true });
 
                     try {
-                        const channel = await createTicketChannel(interaction, 'Ticket created from panel');
+                        const ticketType = interaction.customId.split('_')[1];
+                        let category = '';
+                        let emoji = '';
+
+                        switch (ticketType) {
+                            case 'report':
+                                category = 'Report';
+                                emoji = '📢';
+                                break;
+                            case 'moderation':
+                                category = 'Moderation Support';
+                                emoji = '🛡️';
+                                break;
+                            case 'general':
+                                category = 'General Enquiry';
+                                emoji = '❓';
+                                break;
+                        }
+
+                        const channel = await createTicketChannel(
+                            interaction,
+                            `${emoji} ${category} | ${interaction.user.username}`
+                        );
+
                         await interaction.editReply({
                             content: `Your ticket has been created: ${channel}`,
                             ephemeral: true

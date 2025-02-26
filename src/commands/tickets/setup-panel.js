@@ -13,21 +13,48 @@ module.exports = {
             if (!await checkModPermissions(interaction, 'ManageChannels')) return;
 
             const embed = new EmbedBuilder()
-                .setColor(0x0099FF)
+                .setColor(0x2B2D31)
                 .setTitle('🎫 Support Ticket System')
-                .setDescription('Need help? Click the button below to create a ticket.\n\nOur support team will assist you as soon as possible.')
+                .setDescription('Welcome to our support system! We are here to protect and support our members, especially those experiencing difficulties on Discord. Please select the appropriate category for your ticket below.')
                 .addFields(
-                    { name: 'Guidelines', value: '• One ticket per issue\n• Be patient and respectful\n• Provide all relevant information' }
+                    { 
+                        name: '📢 Emergency Support - External Issues',
+                        value: 'For members experiencing discomfort or anxiety from DMs or external servers\n*(A safe space to discuss concerns about interactions outside our server)*',
+                        inline: true
+                    },
+                    {
+                        name: '🛡️ Moderation Support',
+                        value: 'Get assistance from our moderation team',
+                        inline: true
+                    },
+                    {
+                        name: '❓ General Enquiries',
+                        value: 'Ask questions or get general help',
+                        inline: true
+                    },
+                    {
+                        name: '\u200B',
+                        value: '**Guidelines**\n• One ticket per issue\n• Be patient and respectful\n• Provide all relevant information\n• For reports, please include screenshots or message links when possible\n\n**Click the emoji buttons below:**\n📢 - Emergency Support\n🛡️ - Moderation Support\n❓ - General Help'
+                    }
                 )
-                .setFooter({ text: 'Click the button below to create a ticket' });
+                .setFooter({ 
+                    text: 'Click a button below to create a ticket | Your ticket will be handled by our staff team | We are here to help and protect you' 
+                });
 
             const row = new ActionRowBuilder()
                 .addComponents(
                     new ButtonBuilder()
-                        .setCustomId('create_ticket')
-                        .setLabel('Create Ticket')
+                        .setCustomId('ticket_report')
+                        .setStyle(ButtonStyle.Danger)
+                        .setEmoji('📢'),
+                    new ButtonBuilder()
+                        .setCustomId('ticket_moderation')
                         .setStyle(ButtonStyle.Primary)
-                        .setEmoji('🎫')
+                        .setEmoji('🛡️'),
+                    new ButtonBuilder()
+                        .setCustomId('ticket_general')
+                        .setStyle(ButtonStyle.Success)
+                        .setEmoji('❓')
                 );
 
             await interaction.channel.send({

@@ -1,7 +1,7 @@
-const { ChannelType, PermissionFlagsBits } = require('discord.js');
+const { ChannelType, PermissionFlagsBits, EmbedBuilder } = require('discord.js');
 const { logger } = require('./logger');
 
-async function createTicketChannel(interaction, reason) {
+async function createTicketChannel(interaction, title) {
     try {
         // Find or create Tickets category
         let ticketsCategory = interaction.guild.channels.cache.find(
@@ -20,7 +20,7 @@ async function createTicketChannel(interaction, reason) {
         // Create ticket channel with formatted name
         const ticketNumber = Math.floor(Math.random() * 10000);
         const channelName = `ticket-${ticketNumber}`;
-        
+
         const channel = await interaction.guild.channels.create({
             name: channelName,
             type: ChannelType.GuildText,
@@ -50,12 +50,50 @@ async function createTicketChannel(interaction, reason) {
             ],
         });
 
-        // Send initial ticket information
+        // Create an embed for the initial ticket message
+        const embed = new EmbedBuilder()
+            .setColor(0x2B2D31)
+            .setTitle(title)
+            .setDescription('Thank you for creating a ticket. Our staff team will assist you shortly.')
+            .addFields(
+                { 
+                    name: '📋 Ticket Information',
+                    value: `**Ticket ID:** #${ticketNumber}\n**Created by:** ${interaction.user}\n**Created at:** ${new Date().toLocaleString()}`
+                }
+            );
+
+        // Add specific guidance based on ticket type
+        if (title.includes('Emergency')) {
+            embed.addFields({
+                name: '📝 Important Information Needed',
+                value: 'You are in a safe space. Please share what you feel comfortable with, including:\n' +
+                    '• What happened that made you feel uncomfortable\n' +
+                    '• Any screenshots or message links you can share\n' +
+                    '• The Discord usernames of those involved\n' +
+                    '• When this occurred\n' +
+                    '• Any other details you think are important\n\n' +
+                    '**Remember:** Your safety and comfort are our priority. Take your time, and know that our staff is here to help and protect you.'
+            });
+        } else if (title.includes('Moderation')) {
+            embed.addFields({
+                name: '📝 Next Steps',
+                value: 'Please describe what you need assistance with and our moderation team will help you as soon as possible.'
+            });
+        } else {
+            embed.addFields({
+                name: '📝 Next Steps',
+                value: 'Please describe your inquiry in detail and we will assist you shortly.'
+            });
+        }
+
+        embed.setFooter({ 
+            text: `To close this ticket, use /ticket close` 
+        });
+
+        // Send the embed
         await channel.send({
-            content: `**Ticket #${ticketNumber}**\n`
-                + `**Created by:** ${interaction.user}\n`
-                + `**Reason:** ${reason}\n\n`
-                + `Staff will be with you shortly. To close this ticket, use \`/ticket close\`.`
+            content: `${interaction.user} Welcome to your ticket!`,
+            embeds: [embed]
         });
 
         logger.info(`${interaction.user.tag} created ticket channel ${channel.name}`);
