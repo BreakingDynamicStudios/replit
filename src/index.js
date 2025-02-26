@@ -9,12 +9,20 @@ const os = require('os');
 // Import and start Flask server
 const { PythonShell } = require('python-shell');
 const pythonOptions = {
-    pythonPath: 'python3',
-    scriptPath: 'src'
+    pythonPath: 'python',
+    scriptPath: 'src',
+    mode: 'text'
 };
-PythonShell.run('flask_server.py', pythonOptions, function (err) {
-    if (err) logger.error('Flask server error:', err);
-});
+
+try {
+    PythonShell.run('flask_server.py', pythonOptions).then(messages => {
+        logger.info('Flask server started successfully');
+    }).catch(err => {
+        logger.error('Flask server error:', err);
+    });
+} catch (err) {
+    logger.error('Failed to start Flask server:', err);
+}
 
 const client = new Client({
     intents: [
