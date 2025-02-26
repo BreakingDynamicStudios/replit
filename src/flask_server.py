@@ -11,6 +11,6 @@ def flask_home():
 def run():
     app.run(host='0.0.0.0', port=5000)
 
-def start_flask():
+if __name__ == '__main__':
     t = Thread(target=run)
     t.start()
