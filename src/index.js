@@ -120,7 +120,7 @@ app.get('/url-info', (req, res) => {
 });
 
 // Use consistent port for Replit with fallback
-const PORT = process.env.PORT || 8080;
+const PORT = process.env.PORT || 8081;
 const server = app.listen(PORT, '0.0.0.0', () => {
     logger.info(`Keep-alive server is running on port ${PORT}`);
 }).on('error', (err) => {
