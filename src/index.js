@@ -3,6 +3,16 @@ const fs = require('fs');
 const path = require('path');
 const { logger } = require('./utils/logger');
 const config = require('../config');
+const express = require('express');
+
+const app = express();
+app.use(express.static(path.join(__dirname, 'public')));
+app.get('/ping', (req, res) => {
+    res.json({ status: 'ok', timestamp: new Date() });
+});
+app.listen(3000, '0.0.0.0', () => {
+    logger.info('Status page running on port 3000');
+});
 
 const client = new Client({
     intents: [

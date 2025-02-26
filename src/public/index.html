@@ -1,0 +1,52 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Bot Status</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f2f5;
+        }
+        .status {
+            text-align: center;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        #lastPing {
+            color: #666;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="status">
+        <h1>Bot Status Page</h1>
+        <p id="lastPing">Last ping: Never</p>
+    </div>
+    <script>
+        async function pingBot() {
+            try {
+                const response = await fetch('/ping');
+                const data = await response.json();
+                document.getElementById('lastPing').textContent = 
+                    'Last ping: ' + new Date().toLocaleString();
+            } catch (error) {
+                document.getElementById('lastPing').textContent = 
+                    'Error pinging bot: ' + error.message;
+            }
+        }
+        
+        // Ping immediately and then every 2 minutes
+        pingBot();
+        setInterval(pingBot, 120000);
+    </script>
+</body>
+</html>
